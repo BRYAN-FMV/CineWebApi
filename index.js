@@ -2,12 +2,10 @@ import 'dotenv/config';
 import express from 'express';
 import peliculasRoutes from './routes/peliculas.js';
 import salaRoutes from './routes/sala.js';
+import productoRoutes from './routes/producto.js'; 
 import funcionRoutes from './routes/funcion.js';
 import bodyParser from 'body-parser';
 import dbClient from './config/dbClient.js';
-import peliculaModel from './model/peliculas.js';
-import salaModel from './model/sala.js';
-import funcionModel from './model/funcion.js';
 
 
 const app = express();
@@ -18,6 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/peliculas', peliculasRoutes);
 app.use('/salas', salaRoutes);
 app.use('/funciones', funcionRoutes);
+app.use('/productos', productoRoutes); 
 
 try {
     const PORT = process.env.PORT || 3000;
