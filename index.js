@@ -4,6 +4,8 @@ import peliculasRoutes from './routes/peliculas.js';
 import salaRoutes from './routes/sala.js';
 import productoRoutes from './routes/producto.js'; 
 import funcionRoutes from './routes/funcion.js';
+import asientosRoutes from './routes/asientos.js';
+import usuariosRoutes from './routes/usuarios.js';
 import bodyParser from 'body-parser';
 import dbClient from './config/dbClient.js';
 
@@ -17,6 +19,8 @@ app.use('/peliculas', peliculasRoutes);
 app.use('/salas', salaRoutes);
 app.use('/funciones', funcionRoutes);
 app.use('/productos', productoRoutes); 
+app.use('/asientos', asientosRoutes);
+app.use('/usuarios', usuariosRoutes);
 
 try {
     const PORT = process.env.PORT || 3000;
