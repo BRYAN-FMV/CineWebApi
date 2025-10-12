@@ -1,11 +1,11 @@
 import express from 'express';
 const route = express.Router();
-import productoController from '../controllers/producto.js';    
+import asientosController from '../controllers/asientos.js';
 
-route.get('/', productoController.obtenerProductos);
-route.get('/:id', productoController.obtenerProductoPorId);
-route.post('/', productoController.crearProducto);
-route.put('/:id', productoController.actualizarProducto);
-route.delete('/:id', productoController.eliminarProducto);
+route.get('/', asientosController.obtenerAsientos);
+route.get('/:id', asientosController.obtenerAsientoPorId);
+route.post('/', asientosController.crearAsiento);
+route.put('/:id', asientosController.actualizarAsiento);
+route.delete('/:id', asientosController.eliminarAsiento);
 
 export default route;
