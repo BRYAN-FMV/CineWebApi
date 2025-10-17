@@ -1,4 +1,4 @@
-import Asiento from "../schemas/asientos";
+import Asiento from "../schemas/asientos.js";
 
 class asientoModel {
     async createAsiento(data) {
