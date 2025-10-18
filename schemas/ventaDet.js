@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const ventaDetSchema = new mongoose.Schema({
   ventaEnc: { type: mongoose.Schema.Types.ObjectId, ref: 'VentaEnc', required: true },
   tipo: { type: String, required: true, enum: ['entrada', 'producto'] },
+  cantidad: { type: Number, required: true},
   producto: { type: mongoose.Schema.Types.ObjectId, ref: 'Producto', required: false },
   funcion: { type: mongoose.Schema.Types.ObjectId, ref: 'Funcion', required: false },
   asientoId: { type: mongoose.Schema.Types.ObjectId, ref: 'Asiento', required: false },
