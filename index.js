@@ -17,14 +17,9 @@ import ventaDet from './schemas/ventaDet.js';
 
 const app = express();
 
-// Configurar CORS (antes de las otras middlewares)
-app.use(cors()); // <-- configuración básica (permite todos los orígenes)
 
-// O configuración más específica:
-// app.use(cors({
-//   origin: ['http://localhost:3000', 'http://localhost:5173'], // URLs permitidas del frontend
-//   credentials: true // si necesitas enviar cookies/auth headers
-// }));
+app.use(cors()); 
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
