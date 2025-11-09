@@ -6,7 +6,7 @@ class funcionController {
     // Crear una nueva funcion
     async create(req, res) {
         try {
-            const { pelicula, sala, horario, idioma } = req.body;
+            const { pelicula, sala, horario, idioma, precio } = req.body;
 
             // Validar existencia de referencias
             const pel = await Pelicula.findById(pelicula);
@@ -15,7 +15,7 @@ class funcionController {
             const sal = await Sala.findById(sala);
             if (!sal) return res.status(400).json({ error: 'Sala no existe' });
 
-            const nueva = await Funcion.create({ pelicula, sala, horario, idioma });
+            const nueva = await Funcion.create({ pelicula, sala, horario, idioma, precio });
             const populated = await Funcion.findById(nueva._id).populate('pelicula sala');
 
             res.status(201).json(populated);
