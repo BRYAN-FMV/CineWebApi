@@ -1,11 +1,12 @@
 import express from 'express';
-const route = express.Router();
 import funcionController from '../controllers/funcion.js';
 
-route.post('/', funcionController.create);
-route.get('/', funcionController.getAll);
-route.get('/:id', funcionController.getById);
-route.put('/:id', funcionController.update);
-route.delete('/:id', funcionController.delete);
+const router = express.Router();
 
-export default route;
+router.get('/', funcionController.getAll); 
+router.get('/:id', funcionController.getById);
+router.post('/', funcionController.create);
+router.put('/:id', funcionController.update);
+router.delete('/:id', funcionController.delete);
+
+export default router;
