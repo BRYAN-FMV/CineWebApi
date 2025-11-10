@@ -4,8 +4,11 @@ const productoSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
   precio: { type: Number, required: true },
   categoria: { type: String, required: true,
-    enum: ['Alimentos', 'Bebidas', 'Otros']
+    enum: ['combo', 'bebida', 'snack', 'dulce']
   },
+  imagen: String,
+  disponible: { type: Boolean, default: true },
+    
 }, { timestamps: true }
 );
 
