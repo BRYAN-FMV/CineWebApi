@@ -9,7 +9,7 @@ class VentaDetController {
   async create(req, res) {
     try {
       const usuarioId = req.usuario?.id; // viene del middleware de auth
-      const { ventaEnc, tipo, funcion, asientoId, producto, precio, total } = req.body;
+      const { ventaEnc, tipo, funcion, asientoId, producto, precio, total, cantidad } = req.body;
 
       if (!ventaEnc || !mongoose.Types.ObjectId.isValid(ventaEnc)) {
         return res.status(400).json({ error: 'ventaEnc inválida' });
@@ -27,6 +27,18 @@ class VentaDetController {
 
         const funcionDoc = await Funcion.findById(funcion).select('sala');
         if (!funcionDoc) return res.status(404).json({ error: 'Función no encontrada' });
+
+        // Si la función ya terminó, liberar asientos y rechazar venta
+        if (funcionDoc.horario < new Date()) {
+            // Liberar asientos ocupados de esta función
+            const detalles = await ventaDetModel.findByFuncion(funcion);
+            for (const det of detalles) {
+                if (det.asientoId && det.tipo === 'entrada') {
+                    await Asiento.findByIdAndUpdate(det.asientoId, { $set: { estado: 'disponible' } });
+                }
+            }
+            return res.status(400).json({ error: 'La función ya terminó, asientos liberados' });
+        }
 
         // Verificar si existe reserva previa para esta funcion+asiento
         const reserva = await reservaModel.findByFuncionAndAsiento(funcion, asientoId);
@@ -61,7 +73,8 @@ class VentaDetController {
               asientoId,
               precio,
               total,
-              producto
+              producto,
+              cantidad
             });
             return res.status(201).json(detalle);
           } catch (err) {
@@ -71,6 +84,17 @@ class VentaDetController {
           }
         } else {
           // No hay reserva: intentar ocupar asiento atómicamente (solo si está disponible y pertenece a la sala)
+          const asiento = await Asiento.findById(asientoId);
+          if (!asiento) {
+            return res.status(404).json({ error: 'Asiento no encontrado' });
+          }
+          if (asiento.estado !== 'disponible') {
+            return res.status(409).json({ error: `Asiento en estado: ${asiento.estado}` });
+          }
+          if (asiento.salaId.toString() !== funcionDoc.sala.toString()) {
+            return res.status(400).json({ error: 'Asiento no pertenece a la sala de la función' });
+          }
+
           const ocupado = await Asiento.findOneAndUpdate(
             { _id: asientoId, salaId: funcionDoc.sala, estado: 'disponible' },
             { $set: { estado: 'ocupado' } },
@@ -78,7 +102,7 @@ class VentaDetController {
           );
 
           if (!ocupado) {
-            return res.status(409).json({ error: 'Asiento no disponible' });
+            return res.status(409).json({ error: 'Asiento no disponible (posible concurrencia)' });
           }
 
           // crear detalle; si falla, liberar asiento
@@ -90,7 +114,8 @@ class VentaDetController {
               asientoId,
               precio,
               total,
-              producto
+              producto,
+              cantidad
             });
             return res.status(201).json(detalle);
           } catch (err) {
@@ -108,7 +133,8 @@ class VentaDetController {
         asientoId,
         precio,
         total,
-        producto
+        producto,
+        cantidad
       });
       return res.status(201).json(detalle);
     } catch (err) {

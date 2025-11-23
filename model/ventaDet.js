@@ -28,6 +28,10 @@ class VentaDetModel {
     async findByFuncionAndAsiento(funcionId, asientoId) {
         return await ventaDet.findOne({ funcion: funcionId, asientoId: asientoId });
     }
+
+    async findByFuncion(funcionId) {
+        return await ventaDet.find({ funcion: funcionId });
+    }
 }
 
 export default new VentaDetModel();

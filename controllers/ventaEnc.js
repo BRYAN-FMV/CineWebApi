@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 import ventaEnc from '../model/ventaEnc.js';
+import ventaDetModel from '../model/ventaDet.js';
+import Asiento from '../schemas/asientos.js';
 
 class VentaEncController {
     async createVentaEnc(req, res) {
@@ -56,6 +58,18 @@ class VentaEncController {
             const { id } = req.params;
             if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ error: 'ID inválido' });
 
+            // Obtener los detalles de la venta
+            const detalles = await ventaDetModel.findByVentaEnc(id);
+            
+            // Liberar asientos y eliminar detalles
+            for (const det of detalles) {
+                if (det.tipo === 'entrada' && det.asientoId) {
+                    await Asiento.findByIdAndUpdate(det.asientoId, { $set: { estado: 'disponible' } });
+                }
+                await ventaDetModel.deleteVentaDet(det._id);
+            }
+
+            // Eliminar la venta encabezado
             const deletedVenta = await ventaEnc.deleteVentaEnc(id);
             if (!deletedVenta) return res.status(404).json({ error: 'Venta no encontrada' });
             return res.status(200).json({ message: 'Venta eliminada con éxito' });

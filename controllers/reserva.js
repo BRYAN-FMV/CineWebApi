@@ -5,7 +5,7 @@ import Asiento from '../schemas/asientos.js';
 import Usuario from '../schemas/usuarios.js';
 
 class ReservaController {
-  // Crear reserva: intenta marcar asiento 'reservado' y crear documento de reserva
+  // Crear reserva: verifica que no haya reserva activa y que el asiento esté disponible
   async create(req, res) {
     try {
       const usuarioId = req.usuario?.id;
@@ -19,30 +19,31 @@ class ReservaController {
       const funcionDoc = await Funcion.findById(funcion).select('sala');
       if (!funcionDoc) return res.status(404).json({ error: 'Función no encontrada' });
 
-      // intentar marcar asiento como reservado solo si pertenece a la misma sala y está disponible
-      const marcado = await Asiento.findOneAndUpdate(
-        { _id: asientoId, salaId: funcionDoc.sala, estado: 'disponible' },
-        { $set: { estado: 'reservado' } },
-        { new: true }
-      );
-
-      if (!marcado) return res.status(409).json({ error: 'Asiento no disponible' });
-
-      const expiracion = new Date(Date.now() + minutos * 60 * 1000);
-      try {
-        const reserva = await reservaModel.createReserva({
-          funcion,
-          asientoId,
-          usuarioId,
-          expiracion
-        });
-        return res.status(201).json(reserva);
-      } catch (err) {
-        // rollback: liberar asiento si la creación de reserva falla (p. ej. duplicado)
-        await Asiento.findByIdAndUpdate(asientoId, { $set: { estado: 'disponible' } });
-        if (err.code === 11000) return res.status(409).json({ error: 'Reserva ya existente' });
-        throw err;
+      // Verificar que no haya reserva activa para esta funcion + asiento
+      const existingReserva = await reservaModel.findByFuncionAndAsiento(funcion, asientoId);
+      if (existingReserva && existingReserva.expiracion > new Date()) {
+        return res.status(409).json({ error: 'Ya hay una reserva activa para este asiento en esta función' });
       }
+
+      // Verificar que el asiento esté disponible y pertenezca a la sala
+      const asiento = await Asiento.findById(asientoId);
+      if (!asiento) return res.status(404).json({ error: 'Asiento no encontrado' });
+      if (asiento.estado !== 'disponible') {
+        return res.status(409).json({ error: `Asiento en estado: ${asiento.estado}` });
+      }
+      if (asiento.salaId.toString() !== funcionDoc.sala.toString()) {
+        return res.status(400).json({ error: 'Asiento no pertenece a la sala de la función' });
+      }
+
+      // Crear reserva
+      const expiracion = new Date(Date.now() + minutos * 60 * 1000);
+      const reserva = await reservaModel.createReserva({
+        funcion,
+        asientoId,
+        usuarioId,
+        expiracion
+      });
+      return res.status(201).json(reserva);
     } catch (err) {
       console.error(err);
       return res.status(500).json({ error: err.message });
