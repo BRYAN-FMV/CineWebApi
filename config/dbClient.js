@@ -8,7 +8,7 @@ class dbClient {
     }
 
     async connect() {
-        const queryString = `mongodb+srv://${process.env.USER_DB}:${process.env.PASSWORD_DB}@${process.env.SERVER_DB}/Cine?retryWrites=true&w=majority`;
+        const queryString = process.env.MONGO_URI || `mongodb+srv://${process.env.USER_DB}:${process.env.PASSWORD_DB}@${process.env.SERVER_DB}/Cine?retryWrites=true&w=majority`;
         try {
             await mongoose.connect(queryString);
             this.connected = true;

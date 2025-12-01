@@ -54,6 +54,51 @@ class asientoController {
     }
   }
 
+  // Crear múltiples asientos (bulk)
+  async crearAsientosBulk(req, res) {
+    try {
+      const asientos = req.body; // Espera un array de objetos
+
+      if (!Array.isArray(asientos) || asientos.length === 0) {
+        return res.status(400).json({ error: 'Se requiere un array de asientos no vacío' });
+      }
+
+      const creados = [];
+      const errores = [];
+
+      for (let i = 0; i < asientos.length; i++) {
+        const { salaId, fila, numero, estado, codigo } = asientos[i];
+
+        if (!salaId || !mongoose.Types.ObjectId.isValid(salaId)) {
+          errores.push({ index: i, error: 'salaId inválido' });
+          continue;
+        }
+        const salaExists = await Sala.findById(salaId);
+        if (!salaExists) {
+          errores.push({ index: i, error: 'La sala no existe' });
+          continue;
+        }
+
+        try {
+          const creado = await asientoModel.createAsiento({ salaId, fila, numero, estado, codigo });
+          const populated = await Asiento.findById(creado._id).populate('salaId');
+          creados.push(populated);
+        } catch (error) {
+          if (error.code === 11000) {
+            errores.push({ index: i, error: 'Valor duplicado (código repetido)' });
+          } else {
+            errores.push({ index: i, error: error.message });
+          }
+        }
+      }
+
+      return res.status(201).json({ creados, errores });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
   // Actualizar asiento (si cambia sala, valida existencia)
   async actualizarAsiento(req, res) {
     try {
