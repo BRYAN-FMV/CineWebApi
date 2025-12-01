@@ -21,6 +21,11 @@ const app = express();
 app.use(cors()); 
 
 
+app.get('/', (req, res) => {
+  res.json({ message: 'CineWebApi is running' });
+});
+
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
