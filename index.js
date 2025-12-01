@@ -29,15 +29,15 @@ app.get('/', (req, res) => {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use('/peliculas', peliculasRoutes);
-app.use('/salas', salaRoutes);
-app.use('/funciones', funcionRoutes);
-app.use('/productos', productoRoutes); 
-app.use('/asientos', asientosRoutes);
-app.use('/usuarios', usuariosRoutes);
-app.use('/reserva', reservaRoutes); 
-app.use('/ventaDet', ventaDetRoutes);
-app.use('/ventaEnc', ventaEncRoutes);
+app.use('/api/peliculas', peliculasRoutes);
+app.use('/api/salas', salaRoutes);
+app.use('/api/funciones', funcionRoutes);
+app.use('/api/productos', productoRoutes); 
+app.use('/api/asientos', asientosRoutes);
+app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/reserva', reservaRoutes); 
+app.use('/api/ventaDet', ventaDetRoutes);
+app.use('/api/ventaEnc', ventaEncRoutes);
 
 try {
     const PORT = process.env.PORT || 3000;
